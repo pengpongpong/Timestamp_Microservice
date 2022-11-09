@@ -20,7 +20,6 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
-
 // your first API endpoint... 
 app.get("/api/hello", function (req, res) {
   res.json({greeting: 'hello API'});
@@ -28,14 +27,15 @@ app.get("/api/hello", function (req, res) {
 
 app.get("/api/:date", (req, res) => {
   // get request
-  const unix = req.params.date;
+  let unix = req.params.date;
 
   // check date-format
-  const regex = /\d{4}-\d{2}-\d{2}/
+  const regexDate = /\d{4}-\d{2}-\d{2}/
   const regexUnix = /\d{13}/
   let date;
 
-  if (regex.test(unix) === true) {
+  if (regexDate.test(unix) === true) {
+    unix = Number(new Date(unix))
     date = new Date(unix).toUTCString();
     res.json({
       unix: unix,
@@ -43,14 +43,15 @@ app.get("/api/:date", (req, res) => {
     })
   }
   else if (regexUnix.test(unix) === true) {
-    date = new Date(Number(unix)).toUTCString();
+    unix = Number(unix)
+    date = new Date(unix).toUTCString();
     res.json({
       unix: unix,
       utc: date
     })
   }
-  else if (unix === "") {
-    unix = new Date().getTime();
+  else if (!req.params.date) {
+    unix = Number(new Date().getTime());
     date = new Date(unix).toUTCString();
     res.json({
       unix: unix,
@@ -59,32 +60,10 @@ app.get("/api/:date", (req, res) => {
   }
   else {
     res.json({
-      error: date
+      error: "Invalid Date"
     })
   }
 })
-
-
-// const weekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-// console.log(weekday[date.getDay()])
-// const unix = 1451001600000;
-// const date = new Date(unix)
-
-// console.log(date.toUTCString())
-
-// const day = date.getDay();
-// const month = date.getMonth();
-// const year = date.getFullYear();
-
-// console.log(date.getSeconds())
-
-// console.log(new Date(time).getFullYear())
-// const options = {weekday: "short", day: "numeric", month: "short", year: "numeric", }
-// options.timeZone = "GMT"
-// const newTime = new Intl.DateTimeFormat("en-US", options).format(date)
-// const regex = /((?<=\s)\D{3}(?=\s)) ((?<=\s)\d{2}(?=,))/
-// console.log(newTime.replace(regex, "$2 $1"))
-
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
